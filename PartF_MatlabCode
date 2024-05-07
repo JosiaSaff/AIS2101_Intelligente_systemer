@@ -1,0 +1,222 @@
+Matlab Code For Part F:
+%%Class activity
+%%https://se.mathworks.com/help/fuzzy/working-from-the-command-line.html
+clear, clc, close all;
+%% Create a Mamdani fuzzy inference system .
+fis = mamfis('Name',"Mamdani");
+%% View all the iinformation for a FIS
+%fis
+%% Add input variables
+fis = addInput(fis,[0 1],"Name","Number_Of_Servers");
+fis = addInput(fis,[0 0.7],"Name","Mean_Delay");
+fis = addInput(fis,[0 1], "Name", "Utilisation_Factor");
+%% View 
+%fis.Inputs(1)
+%% Generate Random input
+num_rows = 1000;
+
+range_mean_delay = [0 0.7];
+range_number_of_servers = [0 1];
+range_utilisation_factor = [0 1];
+
+mean_delay = range_mean_delay(1) + (range_mean_delay(2) - range_mean_delay(1)) * rand(num_rows, 1);
+number_of_servers= range_number_of_servers(1) + (range_number_of_servers(2) - range_number_of_servers(1)) * rand(num_rows, 1);
+repair_utilisation = range_utilisation_factor(1) + (range_utilisation_factor(2)- range_utilisation_factor(1)) * rand(num_rows,1);
+
+disp('Generated input data:');
+input_data = [number_of_servers, mean_delay, repair_utilisation];
+disp(input_data(1:10, :));
+
+%% Add membership functions for each of the service
+% quality levels using triangular and trapezoidal membership functions.
+fis = addMF(fis,"Number_Of_Servers","trapmf",[0 0 0.15 0.35],"Name","S");
+fis = addMF(fis,"Number_Of_Servers","trimf",[0.15 0.3 0.45],"Name","RS");
+fis = addMF(fis,"Number_Of_Servers","trimf",[0.3 0.5 0.7],"Name","M");
+fis = addMF(fis,"Number_Of_Servers","trimf",[0.55 0.7 0.85],"Name","RL");
+fis = addMF(fis,"Number_Of_Servers","trapmf",[0.6 0.8 1 1],"Name","L");
+%% View 
+fis.Inputs(1).MembershipFunctions
+%% Add membership functions
+% levels using trapezoidal membership functions.
+fis = addMF(fis,"Mean_Delay","trapmf",[0 0 0.1 0.3],"Name","VS");
+fis = addMF(fis,"Mean_Delay","trimf",[0.1 0.3 0.5],"Name","S");
+fis = addMF(fis,"Mean_Delay","trapmf",[0.4 0.6 0.7 0.7],"Name","M");
+%% Add Utilisation_Factor
+fis = addMF(fis,"Utilisation_Factor","trapmf",[0 0 0.4 0.6],"Name","L");
+fis = addMF(fis,"Utilisation_Factor","trimf",[0.4 0.6 0.8],"Name","M");
+fis = addMF(fis,"Utilisation_Factor","trapmf",[0.6 0.8 1 1],"Name","H");
+
+%% Plot the membership functions for the second output variable.
+%plotmf(fis,"input",1);
+%%
+%plotmf(fis,"input",2);
+%%
+%plotmf(fis,"input",3);
+%% Add the output variable.
+fis = addOutput(fis,[0 1],"Name","Number_Of_Spares");
+%% Add membership functions for tip.
+fis = addMF(fis,"Number_Of_Spares","trapmf",[0 0 0.1 0.3],"Name","VS");
+fis = addMF(fis,"Number_Of_Spares","trimf",[0 0.2 0.4],"Name","S");
+fis = addMF(fis,"Number_Of_Spares","trimf",[0.25 0.35 0.45],"Name","RS");
+fis = addMF(fis,"Number_Of_Spares","trimf",[0.3 0.5 0.7],"Name","M");
+fis = addMF(fis,"Number_Of_Spares","trimf",[0.55 0.65 0.75],"Name","RL");
+fis = addMF(fis,"Number_Of_Spares","trimf",[0.6 0.8 1],"Name","L");
+fis = addMF(fis,"Number_Of_Spares","trapmf",[0.7 0.9 1 1],"Name","VL");
+%% Plot for Sugeno output do not support.
+plotmf(fis,"output",1);
+%% Specify if-then rules using linguistic expressions.
+rule1 = "If (Number_Of_Servers is S) and (Mean_Delay is VS) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule2 = "If (Number_Of_Servers is RS) and (Mean_Delay is VS) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule3 = "If (Number_Of_Servers is M) and (Mean_Delay is VS) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule4 = "If (Number_Of_Servers is RL) and (Mean_Delay is VS) and (Utilisation_Factor is L) then (Number_Of_Spares is S)";
+rule5 = "If (Number_Of_Servers is L) and (Mean_Delay is VS) and (Utilisation_Factor is L) then (Number_Of_Spares is S)";
+rule6 = "If (Number_Of_Servers is S) and (Mean_Delay is S) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule7 = "If (Number_Of_Servers is RS) and (Mean_Delay is S) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule8 = "If (Number_Of_Servers is M) and (Mean_Delay is S) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule9 = "If (Number_Of_Servers is RL) and (Mean_Delay is S) and (Utilisation_Factor is L) then (Number_Of_Spares is S)";
+rule10 = "If (Number_Of_Servers is L) and (Mean_Delay is S) and (Utilisation_Factor is L) then (Number_Of_Spares is S)";
+rule11 = "If (Number_Of_Servers is S) and (Mean_Delay is M) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule12 = "If (Number_Of_Servers is RS) and (Mean_Delay is M) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule13 = "If (Number_Of_Servers is M) and (Mean_Delay is M) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule14 = "If (Number_Of_Servers is RL) and (Mean_Delay is M) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule15 = "If (Number_Of_Servers is L) and (Mean_Delay is M) and (Utilisation_Factor is L) then (Number_Of_Spares is VS)";
+rule16 = "If (Number_Of_Servers is S) and (Mean_Delay is VS) and (Utilisation_Factor is M) then (Number_Of_Spares is S)";
+rule17 = "If (Number_Of_Servers is RS) and (Mean_Delay is VS) and (Utilisation_Factor is M) then (Number_Of_Spares is S)";
+rule18 = "If (Number_Of_Servers is M) and (Mean_Delay is VS) and (Utilisation_Factor is M) then (Number_Of_Spares is RS)";
+rule19 = "If (Number_Of_Servers is RL) and (Mean_Delay is VS) and (Utilisation_Factor is M) then (Number_Of_Spares is M)";
+rule20 = "If (Number_Of_Servers is L) and (Mean_Delay is VS) and (Utilisation_Factor is M) then (Number_Of_Spares is M)";
+rule21 = "If (Number_Of_Servers is S) and (Mean_Delay is S) and (Utilisation_Factor is M) then (Number_Of_Spares is VS)";
+rule22 = "If (Number_Of_Servers is RS) and (Mean_Delay is S) and (Utilisation_Factor is M) then (Number_Of_Spares is VS)";
+rule23 = "If (Number_Of_Servers is M) and (Mean_Delay is S) and (Utilisation_Factor is M) then (Number_Of_Spares is S)";
+rule24 = "If (Number_Of_Servers is RL) and (Mean_Delay is S) and (Utilisation_Factor is M) then (Number_Of_Spares is RS)";
+rule25 = "If (Number_Of_Servers is L) and (Mean_Delay is S) and (Utilisation_Factor is M) then (Number_Of_Spares is RS)";
+rule26 = "If (Number_Of_Servers is S) and (Mean_Delay is M) and (Utilisation_Factor is M) then (Number_Of_Spares is VS)";
+rule27 = "If (Number_Of_Servers is RS) and (Mean_Delay is M) and (Utilisation_Factor is M) then (Number_Of_Spares is VS)";
+rule28 = "If (Number_Of_Servers is M) and (Mean_Delay is M) and (Utilisation_Factor is M) then (Number_Of_Spares is VS)";
+rule29 = "If (Number_Of_Servers is RL) and (Mean_Delay is M) and (Utilisation_Factor is M) then (Number_Of_Spares is S)";
+rule30 = "If (Number_Of_Servers is L) and (Mean_Delay is M) and (Utilisation_Factor is M) then (Number_Of_Spares is S)";
+rule31 = "If (Number_Of_Servers is S) and (Mean_Delay is VS) and (Utilisation_Factor is H) then (Number_Of_Spares is VL)";
+rule32 = "If (Number_Of_Servers is RS) and (Mean_Delay is VS) and (Utilisation_Factor is H) then (Number_Of_Spares is VL)";
+rule33 = "If (Number_Of_Servers is M) and (Mean_Delay is VS) and (Utilisation_Factor is H) then (Number_Of_Spares is M)";
+rule34 = "If (Number_Of_Servers is RL) and (Mean_Delay is VS) and (Utilisation_Factor is H) then (Number_Of_Spares is RL)";
+rule35 = "If (Number_Of_Servers is L) and (Mean_Delay is VS) and (Utilisation_Factor is H) then (Number_Of_Spares is L)";
+rule36 = "If (Number_Of_Servers is S) and (Mean_Delay is S) and (Utilisation_Factor is H) then (Number_Of_Spares is L)";
+rule37 = "If (Number_Of_Servers is RS) and (Mean_Delay is S) and (Utilisation_Factor is H) then (Number_Of_Spares is RL)";
+rule38 = "If (Number_Of_Servers is M) and (Mean_Delay is S) and (Utilisation_Factor is H) then (Number_Of_Spares is M)";
+rule39 = "If (Number_Of_Servers is RL) and (Mean_Delay is S) and (Utilisation_Factor is H) then (Number_Of_Spares is M)";
+rule40 = "If (Number_Of_Servers is L) and (Mean_Delay is S) and (Utilisation_Factor is H) then (Number_Of_Spares is M)";
+rule41 = "If (Number_Of_Servers is S) and (Mean_Delay is M) and (Utilisation_Factor is H) then (Number_Of_Spares is M)";
+rule42 = "If (Number_Of_Servers is RS) and (Mean_Delay is M) and (Utilisation_Factor is H) then (Number_Of_Spares is RS)";
+rule43 = "If (Number_Of_Servers is M) and (Mean_Delay is M) and (Utilisation_Factor is H) then (Number_Of_Spares is S)";
+rule44 = "If (Number_Of_Servers is RL) and (Mean_Delay is M) and (Utilisation_Factor is H) then (Number_Of_Spares is RS)";
+rule45 = "If (Number_Of_Servers is L) and (Mean_Delay is M) and (Utilisation_Factor is H) then (Number_Of_Spares is RS)";
+
+rules = [rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, ...
+        rule11, rule12, rule13, rule14, rule15, rule16, rule17, rule18, rule19, rule20, ...
+        rule21, rule22, rule23, rule24, rule25, rule26, rule27, rule28, rule29, rule30, ...
+        rule31, rule32, rule33, rule34, rule35, rule36, rule37, rule38, rule39, rule40, ...
+        rule41, rule42, rule43, rule44, rule45];
+%% Add the rules to the FIS.
+fis = addRule(fis,rules);
+%% Display the rules
+fis.Rules
+%% To get output from fis
+targets = evalfis(fis, input_data);
+
+disp('Generated targets (Number of Spares):');
+disp(targets(1:10));
+
+%% Dividing The Datasets
+% desired 70% splitt
+num_observations = size(input_data, 1);
+train_ratio = 0.7;
+
+num_train = round(train_ratio * num_observations);
+num_test = num_observations - num_train;
+
+cross_validation = cvpartition(num_observations, "HoldOut", 1-train_ratio);
+
+train_inices = cross_validation.training;
+test_indices = cross_validation.test;
+
+%Divides all train and test data into training andd test sets
+input_train = input_data(train_inices, :);
+input_test = input_data(test_indices, :);
+targets_train = targets(train_inices);
+targets_test = targets(test_indices);
+
+%size(targets_train) %should be 70% = 700
+%size(targets_test) %should be 30% = 300
+
+%% neuro-fuzzy inference system
+num_iterations = 10;
+
+training_data = [input_train, targets_train];
+
+anfis_model = anfis(training_data, num_iterations);
+
+disp(anfis_model)
+
+%% Feed test data to the trained anfis
+predicted_targets = evalfis(input_test, anfis_model);
+
+disp(predicted_targets(1:10));
+disp(targets(1:10))
+%% calculating errors, MSE, RMSE, mean and standard deviation
+errors= targets_test- predicted_targets;
+mse = mean(errors.^2);
+rmse = sqrt(mse);
+
+mean_error = mean(errors);
+std_error = std(errors);
+
+disp(['MSE: ', num2str(mse)]);
+disp(['RMSE: ', num2str(rmse)]);
+disp(['Mean of errors: ', num2str(mean_error)]);
+disp(['Standard deviation of errors: ', num2str(std_error)]);
+
+%% ploting
+%figure;
+%plot(targets_test, predicted_targets);
+%hold on;
+%xlabel('Test Targets');
+%ylabel('Predicted Outputs');
+%title('Test targets vs Predicted Outputs');
+
+%p = polyfit(targets_test, predicted_targets, 1);
+%y_fit = polyval(p, targets_test);
+%plot(targets_test, y_fit, 'r-', 'LineWidth', 1);
+
+%grid on;
+%hold off;
+%% ploting better
+figure;
+plot(targets_test, "go-");
+hold on;
+plot(predicted_targets, "b*-");
+legend("Actual", "Predicted");
+title("Test targets vs Predicted Outputs");
+xlabel("sample number");
+ylabel("number of spares");
+%% beyond limits
+input_beyond_range =  [1.1, 0.8, 1.3;  
+                       1.2, 0.9, 1.3;  
+                      1.3, 1, 1.4];
+
+%input_beyond_range =  [0.8, 0.5, 0.9;
+%                       0.5, 0.2, 0.1;
+%                       0.1, 0.6, 0.6];
+
+% Evaluate FIS output for inputs beyond range
+output_fis = evalfis(input_beyond_range, fis);
+
+% Evaluate ANFIS output for inputs beyond range
+output_anfis = evalfis(input_beyond_range, anfis_model);
+
+% Compare outputs
+disp("Inputs Beyond Range:");
+disp(input_beyond_range);
+disp("FIS Output:");
+disp(output_fis);
+disp("ANFIS Output:");
+disp(output_anfis);
